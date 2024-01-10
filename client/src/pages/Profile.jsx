@@ -50,6 +50,8 @@ const handleFileUpload = (file) => {
     }    
   }, [file])
 
+  console.log(formData)
+
   const handleChange = (e) => {
     setFormData({...formData, [e.target.id]: e.target.value});
   }
@@ -157,7 +159,7 @@ const handleFileUpload = (file) => {
           : ""}</p>
         <input onChange={handleChange} type="text" defaultValue={currentUser.username} placeholder="username" id="username" className="p-3 rounded-lg border" />
         <input onChange={handleChange} type="email" defaultValue={currentUser.email} placeholder="email" id="email" className="p-3 rounded-lg border" />
-        <input type="password" placeholder="password" id="password" className="p-3 rounded-lg border" />
+        <input onChange={handleChange} type="password" placeholder="password" id="password" className="p-3 rounded-lg border" />
         <button disabled={loading} className="uppercase p-3 bg-slate-700 rounded-lg text-white hover:opacity-90 disabled:opacity-70">{loading ? 'Loading...' : 'Update'}</button>
         <Link className="bg-green-700 p-3 text-white text-center uppercase rounded-lg hover:opacity-90" to={'/create-listing'}>Create Listing</Link>
       </form>
