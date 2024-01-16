@@ -8,6 +8,7 @@ const Search = () => {
 
     const [loading, setLoading] = useState(false);
     const [listings, setListings] = useState([]);
+    const [showMore, setShowMore] = useState(false);
     const [sidebarData, setSidebarData] = useState({
         searchTerm: '',
         type: 'all',
@@ -20,7 +21,7 @@ const Search = () => {
 
     const handleChange = (e) => {
 
-        if(e.target.id === 'all' || e.target.id === 'rent' || e.target.id === 'sale'){
+        if(e.target.id === 'all' || e.target.id === 'rent' || e.target.id === 'sell'){
             setSidebarData({...sidebarData, type: e.target.id});
         }
 
@@ -77,10 +78,14 @@ const Search = () => {
 
             const fetchListings = async() => {
                 setLoading(true);
+                setShowMore(false);
                 const searchQuery = urlParams.toString();
                 const res = await fetch(`/api/listing/get?${searchQuery}`);
                 const data = await res.json();
                 setListings(data);
+                if(data.length > 8){
+                    setShowMore(true);
+                }
                 setLoading(false);
             };
 
@@ -88,9 +93,22 @@ const Search = () => {
         }
     },[location.search])
 
+    const handleShowMore = async() => {
+        const startIndex = listings.length;
+        const urlParams = new URLSearchParams(location.search);
+        urlParams.set('startIndex', startIndex);
+        const searchQuery = urlParams.toString();
+        const res = await fetch(`/api/listing/get?${searchQuery}`)
+        const data = await res.json();
+        if(data.length < 9){
+            setShowMore(false);
+        }
+        setListings([...listings, ...data]);
+    };
+
   return (
-    <div className='flex flex-col md:flex-row md:min-h-screen'>
-        <div className='p-7 border-b-2 md:border-r-2'>
+    <div className='flex flex-col md:flex-row '>
+        <div className='p-7 border-b-2 md:border-r-2 md:min-h-screen'>
             <form onSubmit={handleSubmit} className=' flex flex-col gap-8'>
                 <div className='flex items-center gap-2'>
                     <label className='font-semibold whitespace-nowrap'>Search Term</label>
@@ -100,15 +118,15 @@ const Search = () => {
                     <label className='font-semibold'>Type:</label>
                     <div className='flex gap-2'>
                         <input type='checkbox' onChange={handleChange} checked={sidebarData.type === 'all'} id='all' className='w-5' />
-                        <span>Rent & Sale</span>
+                        <span>Rent & Sell</span>
                     </div>
                     <div className='flex gap-2'>
                         <input type='checkbox' onChange={handleChange} checked={sidebarData.type === 'rent'} id='rent' className='w-5' />
                         <span>Rent</span>
                     </div>
                     <div className='flex gap-2'>
-                        <input type='checkbox' onChange={handleChange} checked={sidebarData.type === 'sale'} id='sale' className='w-5' />
-                        <span>Sale</span>
+                        <input type='checkbox' onChange={handleChange} checked={sidebarData.type === 'sell'} id='sell' className='w-5' />
+                        <span>Sell</span>
                     </div>
                     <div className='flex gap-2'>
                         <input type='checkbox' onChange={handleChange} checked={sidebarData.offer} id='offer' className='w-5' />
@@ -154,7 +172,9 @@ const Search = () => {
                     <ListingItem key={listing._id} listing={listing} />
                 ))
                 }
+                {showMore && <button className='text-center text-green-700 hover:underline p-5 w-full' onClick={handleShowMore}>Show more...</button>}
             </div>
+                
         </div>
     </div>
   )
